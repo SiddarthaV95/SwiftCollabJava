@@ -1,5 +1,6 @@
 package com.siddarthavadavalasa.SwiftCollab.service;
 
+import com.siddarthavadavalasa.SwiftCollab.dto.AuthResponseDTO;
 import com.siddarthavadavalasa.SwiftCollab.dto.UserLoginDTO;
 import com.siddarthavadavalasa.SwiftCollab.dto.UserRegisterDTO;
 import com.siddarthavadavalasa.SwiftCollab.dto.UserResponseDTO;
@@ -17,6 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public UserResponseDTO registerUser(UserRegisterDTO dto) {
         User user = User.builder()
@@ -37,15 +39,29 @@ public class UserService {
     }
 
     // 🟢 Login logic
-    public String loginUser(UserLoginDTO dto) {
-        User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    // public String loginUser(UserLoginDTO dto) {
+    //     User user = userRepository.findByEmail(dto.getEmail())
+    //             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
+    //     if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+    //         throw new RuntimeException("Invalid password");
+    //     }
 
-        // Generate JWT token
-        return jwtService.generateToken(user.getUsername());
+    //     // Generate JWT token
+    //     return jwtService.generateToken(user.getUsername());
+    // }
+    public AuthResponseDTO loginUser(UserLoginDTO dto) {
+    User user = userRepository.findByEmail(dto.getEmail())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        throw new RuntimeException("Invalid password");
     }
+
+    String accessToken = jwtService.generateToken(user.getUsername());
+    String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
+
+    return new AuthResponseDTO(accessToken, refreshToken);
+}
+
 }

@@ -24,7 +24,7 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(username) // sets "sub" claim
                 .setIssuedAt(new Date(System.currentTimeMillis())) // issued time
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 1)) // 1 hour
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
